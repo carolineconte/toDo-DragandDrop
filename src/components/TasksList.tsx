@@ -1,55 +1,55 @@
-'use client'
-//Styles
-import { FaPencil, FaRegTrashCan } from "react-icons/fa6";
 //Interfaces
 import { ITask } from "@/interfaces/Task"
-import { MouseEvent, useEffect, useState } from "react";
+import { DragDropContext, Droppable } from '@hello-pangea/dnd'
+import { TaskCard } from "./TaskCard";
 
 type Props = {
   taskList: ITask[];
-  setTaskToEdit: React.Dispatch<React.SetStateAction<ITask | null>>
+  setTaskToEdit: React.Dispatch<React.SetStateAction<ITask | null>>;
+  setTaskList:any;
 }
 
+export const TaskList = ({ taskList, setTaskToEdit, setTaskList}: Props) => {
 
-export const TaskList = ({ taskList, setTaskToEdit }: Props) => {
+  function reorder<T>(list: T[], startIndex: number, endIndex: number) {
+    //cria uma lista nova
+    const result = Array.from(list);
+    //remove o item da posicao inicial
+    const [removed] = result.splice(startIndex, 1);
+    //soltar na posicao q foi deixada
+    result.splice(endIndex, 0, removed)
+    return result
+  }
 
-  const [loading, setLoading] = useState<boolean>(true)
+  function onDragEnd(result: any) {
+    if (!result.destination) {
+      return;
+    }
 
-  const handleDelete = async (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>, _id: string) => {
-    e.preventDefault();
-
-    await fetch('/api?_id=' + _id, {
-      method: 'DELETE',
-    }).then(res => {
-      if (!res.ok) {
-        throw new Error(`Error on delete. Response: ${JSON.stringify(res)}`);
-      }
-    })
+    const items = reorder(taskList, result.source.index, result.destination.index)
+    setTaskList(items)
   }
 
   return (
-    <div className="mt-1 border rounded-xl p-1 mx-auto">
-      {
-        taskList.length > 0 ? (
-          taskList.map(task =>
-            <div className="flex items-center gap-2 justify-between m-4 border p-3 rounded-xl bg-slate-200/50" key={task._id}>
-              <h4 className="text-xl capitalize">{task.title}</h4>
-              <div className="flex items-center gap-1">
-                <button className="btnTask"
-                onClick={() => setTaskToEdit(task)}>
-                  <FaPencil />
-                </button>
-                <button className="btnTask"
-                  onClick={(e) => handleDelete(e, task._id)}>
-                  <FaRegTrashCan />
-                </button>
-              </div>
-            </div>
-          )
-        ) : (
-          <p>Nao ha tarefas cadastradas</p>
-        )
-      }
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="tasks" type="list" direction="vertical">
+        {(provided) => (
+          <div ref={provided.innerRef} {...provided.droppableProps}
+            className="mt-1 border rounded-xl p-1 mx-auto"
+          >
+            {
+              taskList.length > 0 ? (
+                taskList.map((task, index) =>
+                  <TaskCard index={index} setTaskToEdit={setTaskToEdit} task={task} key={task._id} />
+
+                )
+              ) : <p>Nada ainda</p>
+            }
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+
   )
 }

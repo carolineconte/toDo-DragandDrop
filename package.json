@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^16.5.0",
     "lucide-react": "^0.334.0",
     "mongodb": "^6.3.0",
     "mongoose": "^8.1.3",

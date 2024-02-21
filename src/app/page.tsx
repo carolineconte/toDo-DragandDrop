@@ -6,11 +6,11 @@ import { UrgentContainer } from "@/components/UrgentContainer";
 import { ITask } from "@/interfaces/Task";
 import { useEffect, useState } from "react";
 
+
 export default function Home() {
 
   const [taskList, setTaskList] = useState<ITask[]>([])
   const [taskToEdit, setTaskToEdit] = useState<ITask | null>(null)
-  console.log(taskToEdit)
 
   const fetchTaskList = () => {
     const res = fetch('/api').then(res => {
@@ -24,15 +24,16 @@ export default function Home() {
     fetchTaskList()
   }, [taskToEdit])
 
+
   return (
     <>
       {taskToEdit && <Modal setTask={setTaskToEdit} task={taskToEdit} />}
       <main className="grow w-3/4 mx-auto">
         <TaskForm fetchTaskList={fetchTaskList} btnText={'Add task'} />
-        <div>
+     
           <UrgentContainer />
-          <TaskList taskList={taskList} setTaskToEdit={setTaskToEdit} />
-        </div>
+          <TaskList taskList={taskList} setTaskToEdit={setTaskToEdit} setTaskList={setTaskList} />
+
       </main>
     </>
   );
